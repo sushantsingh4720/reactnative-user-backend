@@ -17,4 +17,24 @@ const logInBodyValidation = (body) => {
   return schema.validate(body);
 };
 
-export { signUpBodyValidation, logInBodyValidation };
+const createTodoBodyValidation = (body) => {
+  const schema = Joi.object({
+    title: Joi.string().required().label("Title"),
+    description: Joi.string().label("Description"),
+  });
+  return schema.validate(body);
+};
+const updateTodoBodyValidation = (body) => {
+  const schema = Joi.object({
+    title: Joi.string().label("Title"),
+    description: Joi.string().label("Description"),
+  });
+  return schema.validate(body);
+};
+
+export {
+  signUpBodyValidation,
+  logInBodyValidation,
+  createTodoBodyValidation,
+  updateTodoBodyValidation,
+};

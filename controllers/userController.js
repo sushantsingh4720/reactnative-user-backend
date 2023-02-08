@@ -40,7 +40,9 @@ const signUp = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ error: true, message: "Internal Server Error" });
   }
 };
 
@@ -78,7 +80,9 @@ const login = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ error: true, message: "Internal Server Error" });
   }
 };
 
@@ -108,6 +112,7 @@ const forgotPassword = async (req, res) => {
         .status(401)
         .json({ error: true, message: "No User found with given email" });
     let link = `https://${req.headers.host}/api/user/reset/${user.resetPasswordToken}`;
+    console.log(link);
     const mailOptions = {
       from: `"no-reply" ${process.env.SMTP_USER_NAME}`,
       to: user.email,
@@ -120,7 +125,9 @@ const forgotPassword = async (req, res) => {
       .json({ error: false, message: "A reset email has been sent" });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ error: true, message: "Internal Server Error" });
   }
 };
 
@@ -139,7 +146,9 @@ const reset = async (req, res) => {
     res.sendFile(__dirname + "/reset.html");
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ error: true, message: "Internal Server Error" });
   }
 };
 
@@ -175,13 +184,63 @@ const resetPassword = async (req, res) => {
     res.send("Your password has been updated.");
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ error: true, message: "Internal Server Error" });
+  }
+};
+
+// @route Get api/user/profile
+// @desc View profile information
+// @access authenticated
+const profileView = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select(
+      "-password -resetPasswordToken -resetPasswordExpires -__v"
+    );
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: true, message: "Internal Server Error" });
+  }
+};
+
+// @route POST api/user/profile/updateprofile
+// @desc Update Profile Information
+// @access authenticated
+const updateProfile = async (req, res) => {
+  try {
+    if (req.body.password) {
+      const salt = await bcrypt.genSalt(Number(process.env.SALT));
+      const hashPassword = await bcrypt.hash(req.body.password, salt);
+      req.body = { ...req.body, password: hashPassword };
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { ...req.body },
+      {
+        new: true,
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      user,
+      message: "Profile updated successfully",
+    });
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(500)
+      .json({ error: true, message: "Internal Server Error" });
   }
 };
 
 const generateToken = async (user) => {
   try {
-    const payload = { _id: user._id, role: user.role };
+    const payload = { _id: user._id };
     const token = jwt.sign(payload, process.env.ACCESS_TOKEN_PRIVATE_KEY, {
       expiresIn: "30d",
     });
@@ -191,4 +250,12 @@ const generateToken = async (user) => {
     return Promise.reject(err);
   }
 };
-export { signUp, login, forgotPassword, resetPassword, reset };
+export {
+  signUp,
+  login,
+  forgotPassword,
+  resetPassword,
+  reset,
+  profileView,
+  updateProfile,
+};

@@ -4,7 +4,7 @@ import cors from "cors";
 import dbConnect from "./config/dbConnect.js";
 import authMiddleware from "./middlerware/authMiddleware.js";
 import userRoute from "./routes/userRoute.js";
-
+import todoRoute from "./routes/todoRoute.js";
 //express initialization
 const app = express();
 
@@ -21,10 +21,9 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/", (req, res) => {
   res.status(200).json({ message: "API is working" });
 });
-
 app.use("/api", userRoute);
 app.use(authMiddleware);
-
+app.use("/api", todoRoute);
 //listening on port
 const port = process.env.PORT || 5000;
 app.listen(port, (req, res) => {

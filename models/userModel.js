@@ -19,7 +19,7 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: true,
-      max: 100,
+      max: 16,
       min: 6,
     },
     avatar: {

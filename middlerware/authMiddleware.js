@@ -19,8 +19,7 @@ const authMiddleware = async (req, res, next) => {
     req.user = tokenDetails;
     next();
   } catch (err) {
-    console.log(err);
-    res
+    return res
       .status(401)
       .json({ error: true, message: "Access Denied: Invalid token" });
   }
