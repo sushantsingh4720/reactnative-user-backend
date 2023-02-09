@@ -33,7 +33,9 @@ const createTodo = async (req, res) => {
 
 const getAllTodos = async (req, res) => {
   try {
-    const todos = await Todo.find({ user: req.user._id });
+    const todos = await Todo.find({ user: req.user._id }).sort({
+      createdAt: -1,
+    });
     res.status(200).json({ success: true, todos });
   } catch (error) {
     return res
